@@ -1,0 +1,112 @@
+:root {
+  --bg: #0a0b10;
+
+  --install-text: #c9c7ff;
+  --install-border: rgba(201, 199, 255, 0.35);
+
+  --open-text: #7af2c8;
+  --open-border: rgba(122, 242, 200, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(1200px 600px at 50% 20%, #15172b 0%, transparent 60%),
+    var(--bg);
+  font-family: Inter, system-ui, sans-serif;
+  color: white;
+}
+
+/* Ambient glow */
+.bg-glow {
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, #6c63ff55, transparent 60%);
+  filter: blur(80px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Button */
+.btn {
+  position: relative;
+  width: 220px;
+  height: 72px;
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.03)
+  );
+  backdrop-filter: blur(14px);
+  border: 1px solid;
+  font-size: 18px;
+  letter-spacing: 0.35px;
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.35s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* Text label */
+.label {
+  position: relative;
+  z-index: 2;
+  font-weight: 500;
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease,
+    color 0.35s ease;
+}
+
+/* INSTALL state */
+.btn.install {
+  border-color: var(--install-border);
+}
+
+.btn.install .label {
+  color: var(--install-text);
+}
+
+/* OPEN state */
+.btn.open {
+  border-color: var(--open-border);
+}
+
+.btn.open .label {
+  color: var(--open-text);
+}
+
+/* Loading transitions */
+.btn.loading .label {
+  opacity: 0;
+  transform: scale(0.85);
+}
+
+/* Canvas loader */
+canvas {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.btn.loading canvas {
+  opacity: 1;
+}
