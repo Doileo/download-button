@@ -35,10 +35,64 @@ body {
   pointer-events: none;
 }
 
+/* ============================= */
+/* Play-style row layout */
+/* ============================= */
+
+.app-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* pushes button to the right */
+  width: 380px; /* controls distance between icon and button */
+  padding: 18px 22px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+}
+
+/* Icon + loader container */
+.icon-wrapper {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* SVG icon */
+.app-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 6px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* Loader around icon */
+.icon-wrapper canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 72px;
+  height: 72px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.icon-wrapper.loading canvas {
+  opacity: 1;
+}
+
+/* ============================= */
 /* Button */
+/* ============================= */
+
 .btn {
   position: relative;
-  width: 220px;
+  min-width: 120px;
   height: 72px;
   border-radius: 999px;
   background: linear-gradient(
@@ -96,17 +150,4 @@ body {
 .btn.loading .label {
   opacity: 0;
   transform: scale(0.85);
-}
-
-/* Canvas loader */
-canvas {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-.btn.loading canvas {
-  opacity: 1;
 }

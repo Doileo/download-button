@@ -1,21 +1,38 @@
-<body>
-  <div class="bg-glow" aria-hidden="true"></div>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Download Button</title>
 
-  <div class="app-row">
-    <!-- Icon + loader -->
-    <div class="icon-wrapper">
-      <!-- SVG icon -->
-      <img src="img/schedule-icon.svg" alt="App icon" class="app-icon" />
+    <!-- Link CSS file -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-      <!-- Canvas loader around icon -->
-      <canvas id="loader" width="120" height="120" aria-hidden="true"></canvas>
+  <body>
+    <div class="bg-glow" aria-hidden="true"></div>
+
+    <div class="app-row">
+      <!-- Icon + loader -->
+      <div class="icon-wrapper">
+        <!-- SVG icon -->
+        <img src="img/schedule-icon.svg" alt="App icon" class="app-icon" />
+
+        <!-- Canvas loader around icon -->
+        <canvas
+          id="loader"
+          width="120"
+          height="120"
+          aria-hidden="true"
+        ></canvas>
+      </div>
+
+      <!-- Action button -->
+      <button class="btn install" id="btn" aria-busy="false">
+        <span class="label">Install</span>
+      </button>
     </div>
 
-    <!-- Action button -->
-    <button class="btn install" id="btn" aria-busy="false">
-      <span class="label">Install</span>
-    </button>
-  </div>
-
-  <script src="script.js"></script>
-</body>
+    <script src="script.js"></script>
+  </body>
+</html>
