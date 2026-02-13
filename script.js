@@ -1,48 +1,50 @@
 const btn = document.getElementById("btn");
+const label = btn.querySelector(".label");
 const canvas = document.getElementById("loader");
 const ctx = canvas.getContext("2d");
+const iconWrapper = document.getElementById("iconWrapper");
 
-// Initial visual state
-btn.classList.add("install");
+/*
+  Keeping a simple state so the button behaves predictably.
+  The flow follows a Play Store pattern:
+  Install → Cancel (while downloading) → Open.
+  Using a string state keeps the logic easy to reason about.
+*/
+let state = "idle";
 
 let startTime = null;
-let duration = 1800; // Smooth but still responsive
+let duration = 1800; // Chosen to feel smooth but still responsive
 let animating = false;
 
-// Easing makes the progress feel more natural than linear motion
+/*
+  Using easing instead of linear progress.
+  Linear motion feels mechanical, while easing gives more natural UI feedback.
+*/
 function easeInOut(t) {
-  if (t < 0.5) {
-    return 2 * t * t;
-  }
-  return 1 - Math.pow(-2 * t + 2, 2) / 2;
+  return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 }
 
+/*
+  Drawing the loader with Canvas because the wavy progress effect
+  would be difficult to achieve with pure CSS or a standard spinner.
+  The small distortion makes the progress feel more alive and less generic.
+*/
 function drawLoader(progress, time) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   const cx = canvas.width / 2;
   const cy = canvas.height / 2;
-
-  // Smaller radius so the loader fits comfortably inside the button
   const radius = 28;
 
   const startAngle = -Math.PI / 2;
   const endAngle = startAngle + Math.PI * 2 * progress;
 
-  // Subtle wave to avoid a rigid spinner look
   const amplitude = 2.2;
   const frequency = 9;
   const phase = time * 0.006;
 
-  // Gradient adds depth and keeps the loader from looking flat
-  const gradient = ctx.createLinearGradient(cx - 30, cy - 30, cx + 30, cy + 30);
-  gradient.addColorStop(0, "#8b87ff");
-  gradient.addColorStop(0.5, "#6cfff3");
-  gradient.addColorStop(1, "#8b87ff");
-
   ctx.beginPath();
 
-  // Draw the arc in small segments so each point can be slightly distorted
   for (let angle = startAngle; angle <= endAngle; angle += 0.02) {
     const cos = Math.cos(angle);
     const sin = Math.sin(angle);
@@ -55,19 +57,19 @@ function drawLoader(progress, time) {
     ctx.lineTo(x + cos * waveOffset, y + sin * waveOffset);
   }
 
-  ctx.strokeStyle = gradient;
+  ctx.strokeStyle = "#8b87ff";
   ctx.lineWidth = 3.6;
   ctx.lineCap = "round";
-
-  // Light glow so it reads better on the dark background
-  ctx.shadowBlur = 5;
-  ctx.shadowColor = "#6c63ff66";
-
   ctx.stroke();
 }
 
-// requestAnimationFrame keeps the animation smooth and synced with the browser
+/*
+  requestAnimationFrame keeps the animation smooth and synced
+  with the browser rendering instead of running on a fixed timer.
+*/
 function animate(time) {
+  if (!animating) return;
+
   if (!startTime) startTime = time;
 
   const elapsed = time - startTime;
@@ -80,34 +82,74 @@ function animate(time) {
   if (progress < 1) {
     requestAnimationFrame(animate);
   } else {
-    finish();
+    finishDownload();
   }
 }
 
-// Switch to the completed state so the user knows the action finished
-function finish() {
+/*
+  Starts the download state.
+  The loader is shown around the icon to give clear visual feedback
+  about where the progress belongs.
+*/
+function startDownload() {
+  state = "downloading";
+  animating = true;
+  startTime = null;
+
+  btn.classList.add("loading");
+  btn.classList.remove("install");
+  label.textContent = "Cancel";
+
+  iconWrapper.classList.add("loading");
+
+  requestAnimationFrame(animate);
+}
+
+/*
+  Allows the user to interrupt the process at any time.
+  This mirrors real app store behavior and prevents the UI
+  from feeling locked during the animation.
+*/
+function cancelDownload() {
+  state = "idle";
+  animating = false;
+  startTime = null;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  btn.classList.remove("loading");
+  btn.classList.add("install");
+  label.textContent = "Install";
+
+  iconWrapper.classList.remove("loading");
+}
+
+/*
+  Final state after the progress completes.
+  The button changes meaning to reflect the next available action.
+*/
+function finishDownload() {
+  state = "completed";
   animating = false;
 
   btn.classList.remove("loading", "install");
   btn.classList.add("open");
-  btn.querySelector(".label").textContent = "Open";
+  label.textContent = "Open";
+
+  iconWrapper.classList.remove("loading");
 }
 
+/*
+  Single click handler that reacts based on the current state.
+  Keeping this in one place makes the interaction easier to follow and maintain.
+*/
 btn.addEventListener("click", () => {
-  // Reset back to Install if clicked again (demo behavior)
-  if (btn.classList.contains("open")) {
-    btn.classList.remove("open");
-    btn.classList.add("install");
-    btn.querySelector(".label").textContent = "Install";
-    return;
+  if (state === "idle") {
+    startDownload();
+  } else if (state === "downloading") {
+    cancelDownload();
+  } else if (state === "completed") {
+    // In a real app this would launch the installed app
+    console.log("App opened");
   }
-
-  // Prevent multiple animations from running at the same time
-  if (animating) return;
-
-  animating = true;
-  startTime = null;
-  btn.classList.add("loading");
-
-  requestAnimationFrame(animate);
 });
