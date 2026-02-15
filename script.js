@@ -29,7 +29,10 @@ function easeOut(t) {
 /*
   Drawing the loader with Canvas because the wavy progress effect
   would be difficult to achieve with pure CSS or a standard spinner.
-  The larger radius ensures the progress ring appears around the icon.
+
+  While loading → animated wavy ring.
+  When complete → clean full circle to avoid visual gaps and
+  clearly signal that the process finished.
 */
 function drawLoader(progress, time) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -41,22 +44,27 @@ function drawLoader(progress, time) {
   const startAngle = -Math.PI / 2;
   const endAngle = startAngle + Math.PI * 2 * progress;
 
-  const amplitude = 2.2;
-  const frequency = 9;
-  const phase = time * 0.006;
-
   ctx.beginPath();
 
-  for (let angle = startAngle; angle <= endAngle; angle += 0.02) {
-    const cos = Math.cos(angle);
-    const sin = Math.sin(angle);
+  // At completion, draw a clean circle instead of the wave
+  if (progress >= 1) {
+    ctx.arc(cx, cy, radius, startAngle, startAngle + Math.PI * 2);
+  } else {
+    const amplitude = 2;
+    const frequency = 9;
+    const phase = time * 0.006;
 
-    const x = cx + cos * radius;
-    const y = cy + sin * radius;
+    for (let angle = startAngle; angle <= endAngle; angle += 0.02) {
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
 
-    const waveOffset = Math.sin(angle * frequency + phase) * amplitude;
+      const x = cx + cos * radius;
+      const y = cy + sin * radius;
 
-    ctx.lineTo(x + cos * waveOffset, y + sin * waveOffset);
+      const waveOffset = Math.sin(angle * frequency + phase) * amplitude;
+
+      ctx.lineTo(x + cos * waveOffset, y + sin * waveOffset);
+    }
   }
 
   ctx.strokeStyle = "#8b87ff";
@@ -77,38 +85,31 @@ function animate(time) {
   const elapsed = time - startTime;
   let progress = elapsed / duration;
 
-  if (progress > 1) progress = 1;
-  if (progress < 0) progress = 0;
-
-  let eased = easeOut(progress);
-
-  /*
-    Small visual variation only in the middle so the motion
-    doesn't feel perfectly linear.
-  */
-  if (progress > 0.2 && progress < 0.85) {
-    const visualVariation = Math.sin(elapsed * 0.003) * 0.03;
-    eased += visualVariation;
+  if (progress >= 1) {
+    progress = 1;
   }
 
-  /*
-    Slow down the last part (90%+).
-    This mimics real installers where the final stage takes longer.
-  */
-  if (progress > 0.9) {
-    const slowdown = (progress - 0.9) * 0.5;
-    eased -= slowdown;
-  }
-
-  if (eased > 1) eased = 1;
-  if (eased < 0) eased = 0;
-
+  const eased = easeOut(progress);
   drawLoader(eased, elapsed);
 
   if (progress < 1) {
     requestAnimationFrame(animate);
   } else {
-    finishDownload();
+    /*
+      Stop the animation immediately so the final circle
+      stays stable and doesn't redraw.
+    */
+    animating = false;
+
+    // Draw the final clean circle once
+    drawLoader(1, elapsed);
+
+    /*
+      Small delay before switching to Open.
+      This makes the completion feel intentional,
+      similar to Play Store behavior.
+    */
+    setTimeout(finishDownload, 200);
   }
 }
 
@@ -156,7 +157,6 @@ function cancelDownload() {
 */
 function finishDownload() {
   state = "completed";
-  animating = false;
 
   btn.classList.remove("loading", "install");
   btn.classList.add("open");
