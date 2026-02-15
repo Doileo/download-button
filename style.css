@@ -25,6 +25,7 @@ body {
 }
 
 /* Ambient glow */
+
 .bg-glow {
   position: absolute;
   width: 420px;
@@ -35,7 +36,9 @@ body {
   pointer-events: none;
 }
 
-/* Layout */
+/* ============================= */
+/* Play-style layout */
+/* ============================= */
 
 .app-row {
   display: flex;
@@ -48,7 +51,9 @@ body {
   backdrop-filter: blur(10px);
 }
 
+/* ============================= */
 /* Icon + loader */
+/* ============================= */
 
 .icon-wrapper {
   position: relative;
@@ -68,6 +73,8 @@ body {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
 }
 
+/* Loader positioned around the icon */
+
 .icon-wrapper canvas {
   position: absolute;
   top: 0;
@@ -83,7 +90,9 @@ body {
   opacity: 1;
 }
 
-/* Button (slimmer / Play-like) */
+/* ============================= */
+/* Button */
+/* ============================= */
 
 .btn {
   position: relative;
@@ -117,15 +126,15 @@ body {
 .label {
   position: relative;
   z-index: 2;
-  transition:
-    opacity 0.3s ease,
-    transform 0.3s ease,
-    color 0.35s ease;
+  transition: color 0.35s ease;
 }
 
-/* States */
+/* ============================= */
+/* Button states */
+/* ============================= */
 
 /* INSTALL */
+
 .btn.install {
   border-color: var(--install-border);
 }
@@ -135,17 +144,17 @@ body {
 }
 
 /* LOADING (Cancel) */
+
 .btn.loading {
   border-color: rgba(255, 255, 255, 0.25);
 }
 
 .btn.loading .label {
   color: #e6e6ff;
-  opacity: 1;
-  transform: none;
 }
 
 /* OPEN */
+
 .btn.open {
   border-color: var(--open-border);
 }
