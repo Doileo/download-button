@@ -13,29 +13,29 @@ const iconWrapper = document.getElementById("iconWrapper");
 let state = "idle";
 
 let startTime = null;
-let duration = 1800; // Chosen to feel smooth but still responsive
+let duration = 3000;
+// Longer duration so the user has enough time to cancel the download
 let animating = false;
 
 /*
-  Using easing instead of linear progress.
-  Linear motion feels mechanical, while easing gives more natural UI feedback.
+  Ease-out curve:
+  Starts faster and slows down near the end.
+  This improves perceived performance and feels closer to real download behavior.
 */
-function easeInOut(t) {
-  return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+function easeOut(t) {
+  return 1 - Math.pow(1 - t, 3);
 }
 
 /*
   Drawing the loader with Canvas because the wavy progress effect
   would be difficult to achieve with pure CSS or a standard spinner.
-  The small distortion makes the progress feel more alive and less generic.
+  The larger radius ensures the progress ring appears around the icon.
 */
 function drawLoader(progress, time) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   const cx = canvas.width / 2;
   const cy = canvas.height / 2;
-
-  // Increased radius so the progress ring appears around the icon, not inside it
   const radius = 40;
 
   const startAngle = -Math.PI / 2;
@@ -76,9 +76,33 @@ function animate(time) {
 
   const elapsed = time - startTime;
   let progress = elapsed / duration;
-  if (progress > 1) progress = 1;
 
-  const eased = easeInOut(progress);
+  if (progress > 1) progress = 1;
+  if (progress < 0) progress = 0;
+
+  let eased = easeOut(progress);
+
+  /*
+    Small visual variation only in the middle so the motion
+    doesn't feel perfectly linear.
+  */
+  if (progress > 0.2 && progress < 0.85) {
+    const visualVariation = Math.sin(elapsed * 0.003) * 0.03;
+    eased += visualVariation;
+  }
+
+  /*
+    Slow down the last part (90%+).
+    This mimics real installers where the final stage takes longer.
+  */
+  if (progress > 0.9) {
+    const slowdown = (progress - 0.9) * 0.5;
+    eased -= slowdown;
+  }
+
+  if (eased > 1) eased = 1;
+  if (eased < 0) eased = 0;
+
   drawLoader(eased, elapsed);
 
   if (progress < 1) {
@@ -117,7 +141,6 @@ function cancelDownload() {
   animating = false;
   startTime = null;
 
-  // Clear any partially drawn progress
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   btn.classList.remove("loading");
