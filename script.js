@@ -34,7 +34,9 @@ function drawLoader(progress, time) {
 
   const cx = canvas.width / 2;
   const cy = canvas.height / 2;
-  const radius = 28;
+
+  // Increased radius so the progress ring appears around the icon, not inside it
+  const radius = 40;
 
   const startAngle = -Math.PI / 2;
   const endAngle = startAngle + Math.PI * 2 * progress;
@@ -115,6 +117,7 @@ function cancelDownload() {
   animating = false;
   startTime = null;
 
+  // Clear any partially drawn progress
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   btn.classList.remove("loading");
